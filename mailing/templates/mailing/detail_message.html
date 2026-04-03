@@ -1,0 +1,28 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Детали сообщения{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="jumbotron">
+    <div class="container p-5">
+        <h4>{{ message }}</h4>
+        <p>Автор: {{ message.owner }}</p>
+        <p>{{ message.body_letter }}</p>
+        <div class="row g-0">
+            <footer class="text-center pt-4 my-md-1 pt-md-2">
+                <a class="mx-auto btn-lg btn-block btn btn-outline-secondary" href="{% url 'mailing:list_messages' %}">Вернуться к списку</a>
+            </footer>
+        {% if message.owner == user %}
+            <footer class="pt-2 my-md-1 pt-md-2">
+                <a class="btn btn-outline-secondary" href="{% url 'mailing:update_message' message.pk %}">Редактировать</a>
+            </footer>
+            <footer class="pt-2 my-md-1 pt-md-2">
+                <a class="btn btn-outline-danger" href="{% url 'mailing:delete_message' message.pk %}">Удалить</a>
+            </footer>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

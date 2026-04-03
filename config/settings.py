@@ -1,7 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-
+from django.utils.translation import gettext_lazy as _
 
 load_dotenv(verbose=True)
 
@@ -23,11 +23,14 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_countries",
     "django_cleanup.apps.CleanupConfig",
+    "users",
+    "mailing",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "core.middleware.custom.TimezoneMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -84,10 +87,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "ru"
 
-TIME_ZONE = "Europe/Moscow"
+LANGUAGES = [
+    ("ru", _("Русский")),
+    ("en", _("English")),
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+TIME_ZONE = "UTC"
 
 USE_I18N = True
-USE_L10N = False
+USE_L10N = True
 
 USE_TZ = True
 
@@ -103,26 +113,25 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# EMAIL_HOST = os.getenv("EMAIL_HOST")
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# EMAIL_PORT = os.getenv("EMAIL_PORT")
-# EMAIL_USE_TLS = True if os.getenv("EMAIL_USE_TLS") == "True" else False
-# EMAIL_USE_SSL = True if os.getenv("EMAIL_USE_SSL") == "True" else False
-# EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_USE_TLS = True if os.getenv("EMAIL_USE_TLS") == "True" else False
+EMAIL_USE_SSL = True if os.getenv("EMAIL_USE_SSL") == "True" else False
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# AUTH_USER_MODEL = "users.UserOfService"
+AUTH_USER_MODEL = "users.UserOfService"
 
-# LOGIN_REDIRECT_URL = "catalog:catalog"
-# LOGOUT_REDIRECT_URL = "catalog:catalog"
+LOGIN_REDIRECT_URL = "mailing:index"
+LOGOUT_REDIRECT_URL = "mailing:index"
 
-# LOGIN_URL = "users:login"
+LOGIN_URL = "users:login"
 
 COUNTRIES_FIRST_AUTO_DETECT = True
-COUNTRIES_FIRST = [
-    "RU",
-]
+COUNTRIES_FIRST = ["RU",]
+COUNTRIES_FIRST_SORT = True
 
 # CACHE_ENABLED = True if os.getenv("CACHE_ENABLED") == "True" else False
 

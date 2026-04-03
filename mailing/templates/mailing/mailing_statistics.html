@@ -1,0 +1,38 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Статистика рассылок{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="container marketing">
+    <div class="jumbotron">
+        <div class="row container p-5">
+            <div class="col-6">
+                <p>Пользователь: {{ user }}</p>
+                <p>Количество добавленных получателей: {{ list_recipients }}</p>
+                <p>Количество сообщений: {{ list_messages }}</p>
+                <p>Общее количество попыток отправления: {{ attempts|length }}</p>
+                <p>Количество успешных рассылок: {{ successful_mailing_lists }}</p>
+                <p>Количество не успешных рассылок: {{ unsuccessful_mailing_lists }}</p>
+
+                <div class="row g-0">
+                    <footer class="text-center pt-4 my-md-1 pt-md-2">
+                        <a class="col-7 mx-auto btn-lg btn-block btn btn-outline-secondary" href="{% url 'mailing:index' %}">Вернуться к рассылкам</a>
+                    </footer>
+                </div>
+            </div>
+            <div class="col-6">
+                <h4 class="text-center">Отчёт по рассылкам:</h4>
+                <ul class="list-group">
+                    {% for attempt in attempts %}
+                        <li class="list-group-item">
+                            <a href="{% url 'mailing:detail_mailing' attempt.mailing.pk %}">{{ attempt.attempt_time }} | {{ attempt }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+{% load tz %}
+
+{% block title %}Добавить рассылку{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="pricing-header pt-md-2 pb-md-0 mx-auto text-center">
+    {% if object %}
+        <h5 class="display-5 p-0">Редактирование рассылки</h5>
+    {% else %}
+        <h5 class="display-5 p-0">Добавление рассылки</h5>
+    {% endif %}
+</div>
+<div class="container mt-0 p-0 mb-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-0">
+        <div class="col-lg-3"></div>
+        <div class="col-lg-6 col-md-9 col-sm-12">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal text-center">Настройка рассылки</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="" class="form-floating" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ from.non_field_errors }}
+                        {{ form.as_p }}
+                        {% if object %}
+                            <button type="submit" class="btn btn-lg btn-block btn-info">Сохранить</button>
+                            <a class="btn btn-lg btn-block btn-secondary" href="{% url 'mailing:detail_mailing' mailing.pk %}" >Отмена</a>
+                        {% else %}
+                            <button type="submit" class="btn btn-lg btn-block btn-info">Добавить</button>
+                            <a class="btn btn-lg btn-block btn-secondary" href="{% url 'mailing:index' %}" >Отмена</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

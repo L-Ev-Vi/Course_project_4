@@ -1,0 +1,42 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Список сообщений{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+{% if user.is_authenticated %}
+<div class="text-center p-3">
+    <a class="btn btn-outline-secondary" href="{% url 'mailing:add_message' %}">Создать сообщение</a>
+</div>
+{% endif %}
+      <div class="container marketing">
+        <div class="row">
+          {% for message in messages %}
+              <div class="col-md-4">
+                  <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                      <div class="col p-4 d-flex flex-column position-static">
+                          <h4 class="my-0 font-weight-normal">{{ message.subject_letter }}</h4>
+                          <p class="card-text mb-auto">
+                              {{ message.body_letter|truncatechars:30 }}
+                          </p>
+                          <a href="{% url 'mailing:detail_message' message.pk %}" class="icon-link gap-1 icon-link-hover stretched-link">Перейти к сообщению
+                              <svg class="bi" aria-hidden="true"><use xlink:href="#chevron-right"></use></svg></a>
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+        </div>
+
+
+        <ul class="pagination justify-content-center">
+        {%if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}"><-Предыдущая</a></li>
+        {% endif %}
+            <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+        {%if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">Следующая-></a></li>
+        {% endif %}
+        </ul>
+
+{% endblock %}

@@ -33,6 +33,8 @@ django-countries = "^8.2.0"
 django-phonenumber-field = "^8.4.0"
 phonenumbers = "^9.0.26"
 crispy-bootstrap5 = "^2026.3"
+django-formset = "^2.2.3"
+ipython = "^9.12.0"
 
 [tool.mypy]
 disallow_untyped_defs = true
