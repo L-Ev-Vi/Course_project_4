@@ -13,7 +13,11 @@
                 <p>Дата начала рассылки: {{ mailing.start_time }}</p>
                 <p>Статус: {{ mailing.status }}</p>
                 <p>Дата окончания рассылки: {{ mailing.end_time }}</p>
-                <p>Автор: {{ mailing.owner }}</p>
+                {% if perms.users.can_inactive_users %}
+                    <p>Автор: <a href="{% url 'users:user_information' mailing.owner.pk %}">{{ mailing.owner }}</a></p>
+                {% else %}
+                    <p>Автор: {{ mailing.owner }}</p>
+                {% endif %}
                 <p>Количество получателей: {{ number_mailings }}</p>
                 {% if perms.mailing.can_unpublish_mailing or mailing.owner == user %}
                     <footer class="pt-2 my-md-1 pt-md-2">

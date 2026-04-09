@@ -13,5 +13,7 @@ urlpatterns = [
     path("change_profile/<int:pk>/", views.UpdateUser.as_view(), name="change_profile"),
     path("change_profile/password/", views.PasswordsChangeUser.as_view()),
     path("detail_user/", views.DetailUser.as_view(), name="detail_user"),
+    path("list_users/", views.ListUsers.as_view(), name="list_users"),
+    path("user_information/<int:pk>/", views.DetailUserOfService.as_view(), name="user_information"),
 ]
 

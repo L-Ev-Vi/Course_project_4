@@ -2,19 +2,20 @@ import secrets
 
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.views.generic import DetailView, ListView
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, UpdateView
-from django.views.generic import DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
 
-from users.forms import AuthenticationUserOfService, ChangeUserOfService, FormUserOfService, PasswordChangeUserOfServiceForms
-from users.models import UserOfService
 from mailing.models import Mailing
+from users.forms import AuthenticationUserOfService, ChangeUserOfService, FormUserOfService, \
+    PasswordChangeUserOfServiceForms, ChangeUsersOfService
+from users.models import UserOfService
 
 
 class MyLogin(LoginView):
@@ -81,10 +82,23 @@ class UpdateUser(UpdateView):
     model = UserOfService  # определяем модель
     form_class = ChangeUserOfService  # указываем форму
     template_name = "users/register_user.html"  # определяем шаблон
-    success_url = reverse_lazy("users:detail_user")  # определяем URL-адрес для перехода
 
-    def get_object(self, queryset=None):
-        return self.request.user
+    def get_success_url(self):
+        """Метод перенаправления на страницу 'Пользователя' после его(ё) редактирования."""
+        if self.request.user == self.object:
+            return reverse_lazy("users:detail_user")
+        else:
+            return reverse_lazy("users:user_information", kwargs={"pk": self.object.pk})
+
+    def get_form_class(self):
+        """Метод выполняющий проверку прав доступа на редактирование 'Пользователя'."""
+        user = self.request.user
+        if user == self.object:
+            return ChangeUserOfService
+        elif user.has_perm("users.can_inactive_users"):
+            return ChangeUsersOfService
+        else:
+            raise PermissionDenied
 
 
 class PasswordsChangeUser(PasswordChangeView):
@@ -123,14 +137,50 @@ class DetailUser(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         """Переопределённый метод 'get_context_data'. Метод передаёт количество рассылок пользователя."""
-        context =super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user = self.request.user
-        context["number_mailing_lists"] = Mailing.objects.filter(owner=user).count()
+        context["number_mailing_lists"] = Mailing.objects.filter(owner=user, publication=True).count()
         return context
 
     def get_object(self, queryset=None):
         return self.request.user
 
+
+class ListUsers(ListView):
+    """Классовое представление принимающее GET запрос и возвращающее страницу с зарегистрированными пользователями."""
+
+    model = UserOfService  # определяем модель
+    template_name = "users/list_users.html"  # определяем шаблон
+    context_object_name = "users"  # определяем переменную для использования в шаблоне
+    paginate_by = 18  # определяем количество пользователей на странице
+
+    def get_queryset(self):
+        """Переопределённый метод 'get_queryset'.
+        Метод передаёт список пользователей при условии, что у пользователя есть права менеджера."""
+        users = []
+        user = self.request.user
+        if user.has_perm("mailing.can_unpublish_mailing"):
+            for user in UserOfService.objects.all():
+                if not user.has_perm("mailing.can_unpublish_mailing"):
+                    users.append(user)
+            return users
+        else:
+            return PermissionDenied
+
+
+class DetailUserOfService(LoginRequiredMixin, DetailView):
+    """Классовое представление принимающее GET запрос и возвращающее страницу 'Пользователя'."""
+
+    model = UserOfService  # определяем модель
+    template_name = "users/detail_user.html"  # определяем шаблон
+    context_object_name = "current_user"  # определяем переменную для использования в шаблоне
+
+    def get_context_data(self, **kwargs):
+        """Переопределённый метод 'get_context_data'. Метод передаёт количество рассылок пользователя."""
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()
+        context["number_mailing_lists"] = Mailing.objects.filter(owner=user, publication=True).count()
+        return context
 
 # class UpdateUsers(UpdateView):
 #     """Классовое представление для редактирования пользователей менеджером."""
@@ -138,30 +188,29 @@ class DetailUser(LoginRequiredMixin, DetailView):
 #     model = UserOfService  # определяем модель
 #     form_class = ChangeUserOfService  # указываем форму
 #     template_name = "users/register_user.html"  # определяем шаблон
-#     success_url = reverse_lazy("users:detail_user")  # определяем URL-адрес для перехода
 #
-    # def get_success_url(self):
-    #     """Метод перенаправления на страницу 'Пользователя' после его(ё) редактирования."""
-    #     return reverse_lazy("users:detail_user", kwargs={"pk": self.object.pk})
-    #
-    # def get_form_class(self):
-    #     """Метод выполняющий проверку прав доступа на редактирование 'Пользователя'."""
-    #     user = self.request.user
-    #     if user == self.object.owner:
-    #         return ChangeUserOfService
-    #     elif user.has_perm("users.change_user"):
-    #         return ChangeUserOfService
-    #     else:
-    #         raise PermissionDenied
-    #
-    # def get_object(self, queryset=None):
-    #     return self.request.user
-    #
-    # def get_context_data(self, **kwargs):
-    #     """Переопределённый метод 'get_context_data'. Метод передаёт список общее количество рассылок,
-    #     количество активных рассылок и общее число клиентов в системе."""
-    #     context =super().get_context_data(**kwargs)
-    #     user = self.request.user
-    #     if user in UserOfService.objects.all():
-    #         context["user_pk"] = UserOfService.objects.filter(email=user)
-    #     return context
+#     def get_success_url(self):
+#         """Метод перенаправления на страницу 'Пользователя' после его(ё) редактирования."""
+#         return reverse_lazy("users:detail_user", kwargs={"pk": self.object.pk})
+#
+#     def get_form_class(self):
+#         """Метод выполняющий проверку прав доступа на редактирование 'Пользователя'."""
+#         user = self.request.user
+#         if user == self.object.owner:
+#             return ChangeUserOfService
+#         elif user.has_perm("users.change_user"):
+#             return ChangeUserOfService
+#         else:
+#             raise PermissionDenied
+#
+#     def get_object(self, queryset=None):
+#         return self.request.user
+#
+#     def get_context_data(self, **kwargs):
+#         """Переопределённый метод 'get_context_data'. Метод передаёт список общее количество рассылок,
+#         количество активных рассылок и общее число клиентов в системе."""
+#         context =super().get_context_data(**kwargs)
+#         user = self.request.user
+#         if user in UserOfService.objects.all():
+#             context["user_pk"] = UserOfService.objects.filter(email=user)
+#         return context

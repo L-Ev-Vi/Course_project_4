@@ -36,7 +36,10 @@
                             {% csrf_token %}
                             {{ from.non_field_errors }}
                             {{ form.as_p }}
-                            {% if user.is_authenticated %}
+                            {% if perms.users.can_inactive_users and user.is_authenticated %}
+                                <button type="submit" class="btn btn-lg btn-block btn-success">Сохранить изменения</button>
+                                <a class="btn btn-lg btn-block btn-secondary" href="{% url 'users:user_information' object.pk %}" >Отмена</a>
+                            {% elif user.is_authenticated %}
                                 <button type="submit" class="btn btn-lg btn-block btn-success">Сохранить изменения</button>
                                 <a class="btn btn-lg btn-block btn-secondary" href="{% url 'users:detail_user' %}" >Отмена</a>
                             {% else %}

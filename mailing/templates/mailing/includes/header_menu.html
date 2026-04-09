@@ -15,9 +15,20 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'mailing:index' %}">Главная</a></li>
+            {% if perms.users.can_inactive_users %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'users:list_users' %}">Список пользователей</a></li>
+            {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_recipients' %}">Получатели</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_messages' %}">Сообщения</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'mailing:mailing_statistics' %}">Статистика рассылок</a></li>
+            {% if transition %}
+                <form method="post" action="" class="form-floating" enctype="multipart/form-data">
+                    {% csrf_token %}
+                        <button type="submit" class="nav-item me-2 p-2 btn btn-outline-info">Выполнить рассылку</button>
+                </form>
+            {% elif mailing and not perms.mailing.can_unpublish_mailing %}
+                <li class="nav-item"><a class="me-2 p-2 btn btn-outline-info" href="{% url 'mailing:sending_messages' mailing.pk %}">Выполнить рассылку</a></li>
+            {% endif %}
           {% if user.is_authenticated %}
               <li class="nav-item"><a class="me-2 p-2 btn btn-outline-secondary" href="{% url 'users:detail_user' %}">Профиль</a></li>
               <li class="nav-item">

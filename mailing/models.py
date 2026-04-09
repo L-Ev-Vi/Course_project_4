@@ -19,7 +19,8 @@ class Recipient(models.Model):
 
     def __str__(self) -> str:
         """Метод определяет строковое представление объекта."""
-        return f"{self.last_name} {self.first_name} email: {self.email}"
+        return (f"{self.last_name} {self.first_name} \n"
+                f"email: {self.email}")
 
     class Meta:
         """Клас который добавляет метаданные к модели Category."""
@@ -57,7 +58,7 @@ class Message(models.Model):
 class Mailing(models.Model):
     """Класс описывающий структуру таблицы рассылок."""
 
-    start_time = models.DateTimeField(default=timezone.now(), verbose_name="Начала рассылки", help_text="Дата и время начало рассылки.")
+    start_time = models.DateTimeField(default=timezone.localtime(timezone.now()), verbose_name="Начала рассылки", help_text="Дата и время начало рассылки.")
     end_time = models.DateTimeField(verbose_name="Окончание рассылки", help_text="Дата и время окончания рассылки.")
     status = models.CharField(max_length=10, default="Создана", verbose_name="Статус")
     message = models.ForeignKey(Message, on_delete=models.SET_NULL, null=True, related_name="message",

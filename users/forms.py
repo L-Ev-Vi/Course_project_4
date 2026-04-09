@@ -1,5 +1,6 @@
 from mailing.forms import MixinStyle
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm, UserCreationForm
+from django import forms
 
 from users.models import UserOfService
 
@@ -50,3 +51,17 @@ class PasswordChangeUserOfServiceForms(MixinStyle, PasswordChangeForm):
     """Класс представляющий форму для смены пароля пользователя."""
 
     pass
+
+
+class ChangeUsersOfService(UserChangeForm):
+    """Класс представляющий форму для блокировки пользователей."""
+
+    class Meta(UserChangeForm.Meta):
+        model = UserOfService
+        fields = ["is_active",]
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Метод стилизации полей формы."""
+        super().__init__(*args, **kwargs)
+        self.fields["is_active"].widget.attrs.update({"class": "form-check-input"})
+        self.fields["password"].widget = forms.HiddenInput()

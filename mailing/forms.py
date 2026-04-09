@@ -69,3 +69,18 @@ class FormMailing(MixinStyle, forms.ModelForm):
         elif end_time <= start_time:
             raise ValidationError("Дата начала рассылки должна быть раньше даты её окончания!")
         return cleaned_data
+
+
+class FormMailingPublication(forms.ModelForm):
+    """Класс представляющий форму для отключения рассылки."""
+
+    class Meta:
+        """Клас для добавления данных к форме."""
+
+        model = Mailing  # определяем модель
+        fields = ["publication"]
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Метод стилизации полей формы."""
+        super().__init__(*args, **kwargs)
+        self.fields["publication"].widget.attrs.update({"class": "form-check-input"})

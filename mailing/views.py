@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.views.generic import DetailView, View, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from .models import Recipient, Message, Mailing, MailingAttempts
-from .forms import FormRecipient, FormMessage, FormMailing
+from .forms import FormRecipient, FormMessage, FormMailing, FormMailingPublication
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from users.models import UserOfService
@@ -70,8 +70,6 @@ class UpdateRecipient(LoginRequiredMixin, UpdateView):
         """Метод выполняющий проверку прав доступа на редактирование 'Получателя рассылки'."""
         user = self.request.user
         if user == self.object.owner:
-            return FormRecipient
-        elif user.has_perm("mailing.change_recipient"):
             return FormRecipient
         else:
             raise PermissionDenied
@@ -141,15 +139,13 @@ class UpdateMessage(LoginRequiredMixin, UpdateView):
     template_name = "mailing/add_message.html"  # определяем шаблон
 
     def get_success_url(self):
-        """Метод перенаправления на страницу 'Получателя рассылки' после его(ё) редактирования."""
+        """Метод перенаправления на страницу 'Сообщения' после его(ё) редактирования."""
         return reverse_lazy("mailing:detail_message", kwargs={"pk": self.object.pk})
 
     def get_form_class(self):
-        """Метод выполняющий проверку прав доступа на редактирование 'Сообщения'."""
+        """Метод выполняющий проверку прав доступа, на редактирование 'Сообщения'."""
         user = self.request.user
         if user == self.object.owner:
-            return FormMessage
-        elif user.has_perm("mailing.change_message"):
             return FormMessage
         else:
             raise PermissionDenied
@@ -183,8 +179,8 @@ class IndexMailing(ListView):
         """Переопределённый метод 'get_context_data'. Метод передаёт общее количество рассылок,
         количество активных рассылок и общее число клиентов в системе."""
         context = super().get_context_data(**kwargs)
-        context["number_mailings"] = Mailing.objects.all().count()
-        context["number_mailings_active"] = Mailing.objects.filter(status="Запущена").count()
+        context["number_mailings"] = Mailing.objects.filter(publication=True).count()
+        context["number_mailings_active"] = Mailing.objects.filter(status="Запущена", publication=True).count()
         context["number_recipientes"] = Recipient.objects.all().count()
         return context
 
@@ -196,9 +192,9 @@ class IndexMailing(ListView):
         if user.has_perm("mailing.can_unpublish_mailing"):
             return Mailing.objects.all()
         elif user in users:
-            return Mailing.objects.filter(owner=user)
+            return Mailing.objects.filter(owner=user, publication=True)
         else:
-            return Mailing.objects.all()
+            return Mailing.objects.filter(publication=True)
 
 
 class CreateMailing(LoginRequiredMixin, CreateView):
@@ -248,16 +244,16 @@ class UpdateMailing(LoginRequiredMixin, UpdateView):
     template_name = "mailing/add_mailing.html"  # определяем шаблон
 
     def get_success_url(self):
-        """Метод перенаправления на страницу 'Получателя рассылки' после его(ё) редактирования."""
+        """Метод перенаправления на страницу 'Рассылки' после его(ё) редактирования."""
         return reverse_lazy("mailing:detail_mailing", kwargs={"pk": self.object.pk})
 
     def get_form_class(self):
-        """Метод выполняющий проверку прав доступа на редактирование 'Сообщения'."""
+        """Метод выполняющий проверку прав доступа на редактирование 'Рассылки'."""
         user = self.request.user
         if user == self.object.owner:
             return FormMailing
-        elif user.has_perm("mailing.change_mailing"):
-            return FormMailing
+        elif user.has_perm("mailing.can_unpublish_mailing"):
+            return FormMailingPublication
         else:
             raise PermissionDenied
 
@@ -304,7 +300,7 @@ class CreateSendingMessages(View):
         mailing = get_object_or_404(Mailing, pk=pk)
         recipient = mailing.recipient
         list_recipients = recipient.all()
-        context = {"mailing": mailing, "list_recipients": list_recipients}
+        context = {"mailing": mailing, "list_recipients": list_recipients, "transition": True}
         return render(request, "mailing/create_sending_messages.html", context)
 
     def post(self, request, pk):

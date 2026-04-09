@@ -124,7 +124,6 @@
                           <svg class="bi" aria-hidden="true"><use xlink:href="#chevron-right"></use></svg></a>
                   </div>
                   <div class="col-auto d-none d-lg-block">
-                      {% if mailing.status == Запущена %}
                       <svg
                           aria-label="Placeholder"
                           class="bd-placeholder-img rounded-circle"
@@ -134,11 +133,38 @@
                           width="100"
                           xmlns="http://www.w3.org/2000/svg">
                           <title>Placeholder</title>
-                          <rect width="100%" height="100%" fill="#55595c"></rect>
-                          <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
+                          {% if mailing.status == "Запущена" %}
+                              <rect width="100%" height="100%" fill="#008000"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Запущена</text>
+                          {% elif mailing.status == "Завершена" %}
+                              <rect width="100%" height="100%" fill="#990000"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Завершена</text>
+                          {% else %}
+                              <rect width="100%" height="100%" fill="#044857"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Создана</text>
+                          {% endif %}
                       </svg>
-                      {% endif %}
                   </div>
+                  {% if perms.mailing.can_unpublish_mailing %}
+                  <div class="row">
+                      <div class="col-auto d-none d-lg-block">
+                          <svg
+                              aria-label="Placeholder"
+                              class="bd-placeholder-img rounded-circle"
+                              height="45"
+                              preserveAspectRatio="xMidYMid slice"
+                              role="img"
+                              width="45"
+                              xmlns="http://www.w3.org/2000/svg">
+                              <title>Placeholder</title>
+                              {% if mailing.publication == False %}
+                                  <rect width="100%" height="100%" fill="#990000"></rect>
+                                  <text x="50%" y="50%" fill="#eceeef" dy=".3em">block</text>
+                              {% endif %}
+                          </svg>
+                      </div>
+                  </div>
+                  {% endif %}
               </div>
           </div>
       {% endfor %}
