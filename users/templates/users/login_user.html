@@ -24,7 +24,7 @@
                             <button type="submit" class="btn btn-lg btn-block btn-info">Войти</button>
                             <a class="btn btn-lg btn-block btn-success" href="{% url 'users:register'%}">Регистрация</a>
                             <div class="p-1">
-                                <a class="btn btn-block btn-success" href="#" >Не помню пароль</a>
+                                <a class="btn btn-block btn-success" href="{% url 'users:password_reset' %}" >Не помню пароль</a>
                                 <a class="btn btn-block btn-secondary" href="{% url 'mailing:index' %}" >Отмена</a>
                             </div>
                         </form>

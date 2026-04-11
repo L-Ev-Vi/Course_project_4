@@ -10,7 +10,7 @@
         <div class="row g-0">
             <div class="container col-5">
                 {% if current_user.avatar %}
-                <img src="{{ current_user.avatar | media_filter}}" class="img-fluid rounded-start mt-3 mb-3" height="250" width="200">
+                <img src="{{ current_user.avatar | media_filter}}" class="img-fluid rounded mt-3 mb-3" height="250" width="200">
                 {% else %}
                 <img src="https://avatars.mds.yandex.net/i?id=22e8a8bec2648ec252cf0fc81d928e49ab3bd551-4400625-images-thumbs&n=13" class="img-fluid rounded mt-3 mb-3" height="250" width="200">
                 {% endif %}

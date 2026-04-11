@@ -3,7 +3,8 @@ import secrets
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView, \
+    PasswordResetConfirmView, PasswordResetCompleteView
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
@@ -14,7 +15,7 @@ from django.views.generic.edit import CreateView, UpdateView
 
 from mailing.models import Mailing
 from users.forms import AuthenticationUserOfService, ChangeUserOfService, FormUserOfService, \
-    PasswordChangeUserOfServiceForms, ChangeUsersOfService
+    PasswordChangeUserOfServiceForms, ChangeUsersOfService, PasswordResetUserForm, PasswordResetConfirmForm
 from users.models import UserOfService
 
 
@@ -128,6 +129,36 @@ class PasswordsChangeUser(PasswordChangeView):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
 
 
+class PasswordResetUser(PasswordResetView):
+    """Классовое представление для восстановления пароля пользователя."""
+
+    form_class = PasswordResetUserForm  # указываем форму
+    template_name = "users/password_reset_form.html"  # определяем шаблон
+    email_template_name = "users/password_reset_email.html"
+    success_url = reverse_lazy("users:recovery")  # определяем URL-адрес для перехода
+
+
+class Recovery(TemplateView):
+    """Классовое представление принимающее GET запрос,
+    и возвращающее страницу с сообщением об необходимости перейти в почту."""
+
+    template_name = "users/recovery.html"  # определяем шаблон
+
+
+class PasswordResetConfirmUser(PasswordResetConfirmView):
+    """Классовое представление для ввода нового пароля пользователя."""
+
+    form_class = PasswordResetConfirmForm  # указываем форму
+    template_name = "users/password_reset_confirm.html"  # определяем шаблон
+    success_url = reverse_lazy("users:password_reset_complete")  # определяем URL-адрес для перехода
+
+
+class PasswordResetCompleteUser(PasswordResetCompleteView):
+    """Классовое представление для уведомления о смене пароля пользователя."""
+
+    template_name = "users/password_reset_complete.html"  # определяем шаблон
+
+
 class DetailUser(LoginRequiredMixin, DetailView):
     """Классовое представление принимающее GET запрос и возвращающее страницу 'Пользователя'."""
 
@@ -181,36 +212,3 @@ class DetailUserOfService(LoginRequiredMixin, DetailView):
         user = self.get_object()
         context["number_mailing_lists"] = Mailing.objects.filter(owner=user, publication=True).count()
         return context
-
-# class UpdateUsers(UpdateView):
-#     """Классовое представление для редактирования пользователей менеджером."""
-#
-#     model = UserOfService  # определяем модель
-#     form_class = ChangeUserOfService  # указываем форму
-#     template_name = "users/register_user.html"  # определяем шаблон
-#
-#     def get_success_url(self):
-#         """Метод перенаправления на страницу 'Пользователя' после его(ё) редактирования."""
-#         return reverse_lazy("users:detail_user", kwargs={"pk": self.object.pk})
-#
-#     def get_form_class(self):
-#         """Метод выполняющий проверку прав доступа на редактирование 'Пользователя'."""
-#         user = self.request.user
-#         if user == self.object.owner:
-#             return ChangeUserOfService
-#         elif user.has_perm("users.change_user"):
-#             return ChangeUserOfService
-#         else:
-#             raise PermissionDenied
-#
-#     def get_object(self, queryset=None):
-#         return self.request.user
-#
-#     def get_context_data(self, **kwargs):
-#         """Переопределённый метод 'get_context_data'. Метод передаёт список общее количество рассылок,
-#         количество активных рассылок и общее число клиентов в системе."""
-#         context =super().get_context_data(**kwargs)
-#         user = self.request.user
-#         if user in UserOfService.objects.all():
-#             context["user_pk"] = UserOfService.objects.filter(email=user)
-#         return context

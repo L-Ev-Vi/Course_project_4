@@ -1,5 +1,5 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 
 
@@ -58,7 +58,8 @@ class Message(models.Model):
 class Mailing(models.Model):
     """Класс описывающий структуру таблицы рассылок."""
 
-    start_time = models.DateTimeField(default=timezone.localtime(timezone.now()), verbose_name="Начала рассылки", help_text="Дата и время начало рассылки.")
+    start_time = models.DateTimeField(default=timezone.localtime(timezone.now()), verbose_name="Начала рассылки",
+                                      help_text="Дата и время начало рассылки.")
     end_time = models.DateTimeField(verbose_name="Окончание рассылки", help_text="Дата и время окончания рассылки.")
     status = models.CharField(max_length=10, default="Создана", verbose_name="Статус")
     message = models.ForeignKey(Message, on_delete=models.SET_NULL, null=True, related_name="message",
@@ -102,7 +103,8 @@ class MailingAttempts(models.Model):
     attempt_time = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время попытки")
     status = models.CharField(max_length=12, verbose_name="Статус")
     server_response = models.TextField(verbose_name="Ответ почтового сервиса.")
-    mailing = models.ForeignKey(Mailing, on_delete=models.SET_NULL, null=True, related_name="mailings", verbose_name="Рассылка")
+    mailing = models.ForeignKey(Mailing, on_delete=models.SET_NULL, null=True, related_name="mailings",
+                                verbose_name="Рассылка")
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Автор"
     )

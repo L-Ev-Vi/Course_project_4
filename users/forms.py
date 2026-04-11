@@ -1,7 +1,8 @@
-from mailing.forms import MixinStyle
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm, UserCreationForm
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm, UserCreationForm, \
+    PasswordResetForm, SetPasswordForm
 
+from mailing.forms import MixinStyle
 from users.models import UserOfService
 
 
@@ -17,7 +18,6 @@ class FormUserOfService(MixinStyle, UserCreationForm):
 
 class AuthenticationUserOfService(MixinStyle, AuthenticationForm):
     """Класс представляющий форму для входа пользователя в систему."""
-
     pass
 
 
@@ -45,11 +45,11 @@ class ChangeUserOfService(UserChangeForm):
         self.fields["country"].widget.attrs.update({"class": "form-select", "placeholder": "Страна"})
         self.fields["phone_number"].widget.attrs.update({"class": "form-control", "placeholder": "Номер телефона"})
         self.fields["avatar"].widget.attrs.update({"class": "form-control", "accept": "/media/*"})
+        self.fields["password"].widget = forms.HiddenInput()
 
 
 class PasswordChangeUserOfServiceForms(MixinStyle, PasswordChangeForm):
     """Класс представляющий форму для смены пароля пользователя."""
-
     pass
 
 
@@ -58,10 +58,20 @@ class ChangeUsersOfService(UserChangeForm):
 
     class Meta(UserChangeForm.Meta):
         model = UserOfService
-        fields = ["is_active",]
+        fields = ["is_active", ]
 
     def __init__(self, *args, **kwargs) -> None:
         """Метод стилизации полей формы."""
         super().__init__(*args, **kwargs)
         self.fields["is_active"].widget.attrs.update({"class": "form-check-input"})
         self.fields["password"].widget = forms.HiddenInput()
+
+
+class PasswordResetUserForm(MixinStyle, PasswordResetForm):
+    """Класс представляющий форму для ввода почты при восстановлении пароля пользователя."""
+    pass
+
+
+class PasswordResetConfirmForm(MixinStyle, SetPasswordForm):
+    """Класс представляющий форму для ввода нового пароля при восстановлении пароля пользователя."""
+    pass

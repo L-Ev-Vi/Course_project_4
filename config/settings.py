@@ -1,7 +1,8 @@
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from pathlib import Path
+
 from django.utils.translation import gettext_lazy as _
+from dotenv import load_dotenv
 
 load_dotenv(verbose=True)
 
@@ -55,7 +56,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -130,7 +130,7 @@ LOGOUT_REDIRECT_URL = "mailing:index"
 LOGIN_URL = "users:login"
 
 COUNTRIES_FIRST_AUTO_DETECT = True
-COUNTRIES_FIRST = ["RU",]
+COUNTRIES_FIRST = ["RU", ]
 COUNTRIES_FIRST_SORT = True
 
 # CACHE_ENABLED = True if os.getenv("CACHE_ENABLED") == "True" else False

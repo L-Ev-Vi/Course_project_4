@@ -2,13 +2,14 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, View, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from .models import Recipient, Message, Mailing, MailingAttempts
-from .forms import FormRecipient, FormMessage, FormMailing, FormMailingPublication
-from django.urls import reverse_lazy, reverse
-from django.shortcuts import get_object_or_404, render, redirect
+
 from users.models import UserOfService
+from .forms import FormRecipient, FormMessage, FormMailing, FormMailingPublication
+from .models import Recipient, Message, Mailing, MailingAttempts
 
 
 # Recipient

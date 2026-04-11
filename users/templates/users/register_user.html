@@ -40,6 +40,9 @@
                                 <button type="submit" class="btn btn-lg btn-block btn-success">Сохранить изменения</button>
                                 <a class="btn btn-lg btn-block btn-secondary" href="{% url 'users:user_information' object.pk %}" >Отмена</a>
                             {% elif user.is_authenticated %}
+                                <div class="mb-4">
+                                    <a class="btn btn-block btn-outline-secondary" href="{% url 'users:password_change' %}" >Сменить пароль</a>
+                                </div>
                                 <button type="submit" class="btn btn-lg btn-block btn-success">Сохранить изменения</button>
                                 <a class="btn btn-lg btn-block btn-secondary" href="{% url 'users:detail_user' %}" >Отмена</a>
                             {% else %}
