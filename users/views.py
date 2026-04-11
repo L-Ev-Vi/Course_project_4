@@ -12,11 +12,13 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, UpdateView
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
-from mailing.models import Mailing
 from users.forms import AuthenticationUserOfService, ChangeUserOfService, FormUserOfService, \
     PasswordChangeUserOfServiceForms, ChangeUsersOfService, PasswordResetUserForm, PasswordResetConfirmForm
 from users.models import UserOfService
+from mailing.service import MailingService
 
 
 class MyLogin(LoginView):
@@ -28,10 +30,10 @@ class MyLogin(LoginView):
 
 class MyLogout(LogoutView):
     """Классовое представление для выхода пользователей из системы."""
-
     pass
 
 
+@method_decorator(cache_page(60 * 60), name="dispatch")
 class Verification(TemplateView):
     """Классовое представление принимающее GET запрос,
     и возвращающее страницу с сообщением об необходимости подтверждения почты."""
@@ -137,7 +139,7 @@ class PasswordResetUser(PasswordResetView):
     email_template_name = "users/password_reset_email.html"
     success_url = reverse_lazy("users:recovery")  # определяем URL-адрес для перехода
 
-
+@method_decorator(cache_page(60 * 60), name="dispatch")
 class Recovery(TemplateView):
     """Классовое представление принимающее GET запрос,
     и возвращающее страницу с сообщением об необходимости перейти в почту."""
@@ -170,13 +172,13 @@ class DetailUser(LoginRequiredMixin, DetailView):
         """Переопределённый метод 'get_context_data'. Метод передаёт количество рассылок пользователя."""
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context["number_mailing_lists"] = Mailing.objects.filter(owner=user, publication=True).count()
+        context["number_mailing_lists"] = MailingService.get_list_mailing_published_user(user).count()
         return context
 
     def get_object(self, queryset=None):
         return self.request.user
 
-
+@method_decorator(cache_page(60 * 1), name="dispatch")
 class ListUsers(ListView):
     """Классовое представление принимающее GET запрос и возвращающее страницу с зарегистрированными пользователями."""
 
@@ -188,17 +190,17 @@ class ListUsers(ListView):
     def get_queryset(self):
         """Переопределённый метод 'get_queryset'.
         Метод передаёт список пользователей при условии, что у пользователя есть права менеджера."""
-        users = []
+        list_users = []
         user = self.request.user
         if user.has_perm("mailing.can_unpublish_mailing"):
             for user in UserOfService.objects.all():
                 if not user.has_perm("mailing.can_unpublish_mailing"):
-                    users.append(user)
-            return users
+                    list_users.append(user)
+            return list_users
         else:
             return PermissionDenied
 
-
+@method_decorator(cache_page(60 * 5), name="dispatch")
 class DetailUserOfService(LoginRequiredMixin, DetailView):
     """Классовое представление принимающее GET запрос и возвращающее страницу 'Пользователя'."""
 
@@ -210,5 +212,5 @@ class DetailUserOfService(LoginRequiredMixin, DetailView):
         """Переопределённый метод 'get_context_data'. Метод передаёт количество рассылок пользователя."""
         context = super().get_context_data(**kwargs)
         user = self.get_object()
-        context["number_mailing_lists"] = Mailing.objects.filter(owner=user, publication=True).count()
+        context["number_mailing_lists"] = MailingService.get_list_mailing_published_user(user).count()
         return context

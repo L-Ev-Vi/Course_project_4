@@ -58,7 +58,7 @@ class Message(models.Model):
 class Mailing(models.Model):
     """Класс описывающий структуру таблицы рассылок."""
 
-    start_time = models.DateTimeField(default=timezone.localtime(timezone.now()), verbose_name="Начала рассылки",
+    start_time = models.DateTimeField(default=timezone.now, verbose_name="Начала рассылки",
                                       help_text="Дата и время начало рассылки.")
     end_time = models.DateTimeField(verbose_name="Окончание рассылки", help_text="Дата и время окончания рассылки.")
     status = models.CharField(max_length=10, default="Создана", verbose_name="Статус")

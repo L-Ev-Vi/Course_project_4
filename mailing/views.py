@@ -2,14 +2,17 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import DetailView, View, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from users.models import UserOfService
 from .forms import FormRecipient, FormMessage, FormMailing, FormMailingPublication
 from .models import Recipient, Message, Mailing, MailingAttempts
+from .service import MailingService
 
 
 # Recipient
@@ -28,9 +31,9 @@ class ListRecipients(LoginRequiredMixin, ListView):
         Метод отбирает только тех получателей к которым у пользователя есть доступ."""
         user = self.request.user
         if user.has_perm("mailing.can_unpublish_mailing"):
-            return Recipient.objects.all()
+            return MailingService.get_list_recipients()
         else:
-            return Recipient.objects.filter(owner=user)
+            return MailingService.get_list_recipients_user(user)
 
 
 class CreateRecipient(LoginRequiredMixin, CreateView):
@@ -48,6 +51,7 @@ class CreateRecipient(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+@method_decorator(cache_page(60 * 2), name="dispatch")
 class DetailRecipient(LoginRequiredMixin, DetailView):
     """Классовое представление принимающее GET запрос и возвращающее страницу 'Получателя рассылки'."""
 
@@ -105,9 +109,9 @@ class ListMessage(LoginRequiredMixin, ListView):
         Метод отбирает только те сообщения к которым у пользователя есть доступ."""
         user = self.request.user
         if user.has_perm("mailing.can_unpublish_mailing"):
-            return Message.objects.all()
+            return MailingService.get_list_messages()
         else:
-            return Message.objects.filter(owner=user)
+            return MailingService.get_list_messages_user(user)
 
 
 class CreateMessage(LoginRequiredMixin, CreateView):
@@ -124,6 +128,7 @@ class CreateMessage(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+@method_decorator(cache_page(60 * 2), name="dispatch")
 class DetailMessage(LoginRequiredMixin, DetailView):
     """Классовое представление принимающее GET запрос и возвращающее страницу 'Сообщения'."""
 
@@ -180,9 +185,9 @@ class IndexMailing(ListView):
         """Переопределённый метод 'get_context_data'. Метод передаёт общее количество рассылок,
         количество активных рассылок и общее число клиентов в системе."""
         context = super().get_context_data(**kwargs)
-        context["number_mailings"] = Mailing.objects.filter(publication=True).count()
-        context["number_mailings_active"] = Mailing.objects.filter(status="Запущена", publication=True).count()
-        context["number_recipientes"] = Recipient.objects.all().count()
+        context["number_mailings"] = MailingService.get_list_mailing_published().count()
+        context["number_mailings_active"] = MailingService.get_list_mailing_published_and_launched().count()
+        context["number_recipientes"] = MailingService.get_list_recipients().count()
         return context
 
     def get_queryset(self):
@@ -191,11 +196,11 @@ class IndexMailing(ListView):
         user = self.request.user
         users = UserOfService.objects.all()
         if user.has_perm("mailing.can_unpublish_mailing"):
-            return Mailing.objects.all()
+            return MailingService.get_list_all_mailing()
         elif user in users:
-            return Mailing.objects.filter(owner=user, publication=True)
+            return MailingService.get_list_mailing_published_user(user)
         else:
-            return Mailing.objects.filter(publication=True)
+            return MailingService.get_list_mailing_published()
 
 
 class CreateMailing(LoginRequiredMixin, CreateView):
@@ -281,7 +286,7 @@ class SendingMessages(View):
 
     def get(self, request, pk):
         """Метод перекидывает на страницу согласно статусу рассылки"""
-        mailing = get_object_or_404(Mailing, pk=pk)
+        mailing = MailingService.get_mailing(pk)
         if mailing.status in ("Создана", "Завершена"):
             recipient = mailing.recipient
             number_mailings = recipient.count()
@@ -298,7 +303,7 @@ class CreateSendingMessages(View):
 
     def get(self, request, pk):
         """Рендит страницу для запуска рассылки"""
-        mailing = get_object_or_404(Mailing, pk=pk)
+        mailing = MailingService.get_mailing(pk)
         recipient = mailing.recipient
         list_recipients = recipient.all()
         context = {"mailing": mailing, "list_recipients": list_recipients, "transition": True}
@@ -306,7 +311,7 @@ class CreateSendingMessages(View):
 
     def post(self, request, pk):
         """Метод выполняет рассылку сообщений и сохраняет результат рассылки в БД."""
-        mailing = get_object_or_404(Mailing, pk=pk)
+        mailing = MailingService.get_mailing(pk)
         recipient = mailing.recipient
         recipients = recipient.all()
         subject = mailing.message.subject_letter
@@ -342,15 +347,17 @@ class MailingStatistics(LoginRequiredMixin, ListView):
         """Переопределённый метод 'get_queryset'.
         Метод отбирает только те попытки рассылок к которым относятся к пользователю."""
         user = self.request.user
-        return MailingAttempts.objects.filter(owner=user)
+        return MailingService.get_list_mailing_attempts_user(user)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         """Переопределённый метод 'get_context_data'. Метод передаёт количество рассылок,
         количество успешных и не успешных рассылок и общее число клиентов пользователя."""
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context["successful_mailing_lists"] = MailingAttempts.objects.filter(owner=user, status="Успешно").count()
-        context["unsuccessful_mailing_lists"] = MailingAttempts.objects.filter(owner=user, status="Не успешно").count()
-        context["list_recipients"] = Recipient.objects.filter(owner=user).count()
-        context["list_messages"] = Message.objects.filter(owner=user).count()
+        context["successful_mailing_lists"] = MailingService.get_list_mailing_attempts_user_status_successfully(
+            user).count()
+        context["unsuccessful_mailing_lists"] = MailingService.get_list_mailing_attempts_user_status_not_successfully(
+            user).count()
+        context["list_recipients"] = MailingService.get_list_recipients_user(user).count()
+        context["list_messages"] = MailingService.get_list_messages_user(user).count()
         return context
