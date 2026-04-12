@@ -4,6 +4,8 @@ from django.utils import timezone
 
 
 class TimezoneMiddleware:
+    """Описана логика определения временной зоны пользователя, используя куки(cookies) файлы браузера."""
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -14,6 +16,7 @@ class TimezoneMiddleware:
         else:
             timezone.activate(zoneinfo.ZoneInfo("UTC"))
         return self.get_response(request)
+
 
 # class TimezoneMiddleware:
 #     def __init__(self, get_response):

@@ -3,7 +3,7 @@ name = "course-project-4"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Evgenii_Lobachev",email = "lobachev9614@gmail.com"}
+    { name = "Evgenii_Lobachev", email = "lobachev9614@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -16,10 +16,10 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.lint.dependencies]
-black = "^26.3.1"
 flake8 = "^7.3.0"
 isort = "^8.0.1"
 mypy = "^1.19.1"
+black = "^26.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -40,7 +40,7 @@ redis = "^7.4.0"
 [tool.mypy]
 disallow_untyped_defs = true
 warn_return_any = true
-exclude = ['.venv','tests', 'idea', 'git', '.coverage', 'logs', 'static']
+exclude = ['.venv', 'tests', 'idea', 'git', '.coverage', 'logs', 'static', 'media']
 
 [tool.isort]
 profile = "black"

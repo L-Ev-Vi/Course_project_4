@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from mailing.models import Recipient, Message, Mailing
+from mailing.models import Mailing, Message, Recipient
 
 
 @admin.register(Recipient)
@@ -51,7 +51,8 @@ class MailingAdmin(admin.ModelAdmin):
         "end_time",
         "owner",
     )
-    list_filter = ("owner", "status",)
-    search_fields = (
-        "start_time",
+    list_filter = (
+        "owner",
+        "status",
     )
+    search_fields = ("start_time",)

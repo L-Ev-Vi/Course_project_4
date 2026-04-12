@@ -2,20 +2,21 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy, reverse
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.generic import DetailView, View, ListView
+from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from users.models import UserOfService
-from .forms import FormRecipient, FormMessage, FormMailing, FormMailingPublication
-from .models import Recipient, Message, Mailing, MailingAttempts
+
+from .forms import FormMailing, FormMailingPublication, FormMessage, FormRecipient
+from .models import Mailing, MailingAttempts, Message, Recipient
 from .service import MailingService
 
-
 # Recipient
+
 
 class ListRecipients(LoginRequiredMixin, ListView):
     """Классовое представление принимающее GET запрос
@@ -61,7 +62,8 @@ class DetailRecipient(LoginRequiredMixin, DetailView):
 
 
 class UpdateRecipient(LoginRequiredMixin, UpdateView):
-    """Классовое представление принимающее GET и POST запрос и возвращающее страницу редактирования 'Получателя рассылки'."""
+    """Классовое представление принимающее GET и POST запрос,
+    и возвращающее страницу редактирования 'Получателя рассылки'."""
 
     model = Recipient  # определяем модель
     form_class = FormRecipient  # указываем форму
@@ -82,7 +84,7 @@ class UpdateRecipient(LoginRequiredMixin, UpdateView):
 
 class DeleteRecipient(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Классовое представление принимающее GET и POST запросы,
-        и возвращающее страницу подтверждения об удалении 'Получателя рассылки'."""
+    и возвращающее страницу подтверждения об удалении 'Получателя рассылки'."""
 
     model = Recipient  # определяем модель
     template_name = "mailing/delete_recipient.html"  # определяем шаблон
@@ -95,6 +97,7 @@ class DeleteRecipient(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 # Message
+
 
 class ListMessage(LoginRequiredMixin, ListView):
     """Классовое представление принимающее GET запрос и возвращающее страницу с сообщениями."""
@@ -159,7 +162,7 @@ class UpdateMessage(LoginRequiredMixin, UpdateView):
 
 class DeleteMessage(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Классовое представление принимающее GET и POST запросы,
-        и возвращающее страницу подтверждения об удалении 'Сообщения'."""
+    и возвращающее страницу подтверждения об удалении 'Сообщения'."""
 
     model = Message  # определяем модель
     template_name = "mailing/delete_message.html"  # определяем шаблон
@@ -172,6 +175,7 @@ class DeleteMessage(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 # Mailing
+
 
 class IndexMailing(ListView):
     """Классовое представление принимающее GET запрос и возвращающее главную страницу с рассылками."""
@@ -266,7 +270,7 @@ class UpdateMailing(LoginRequiredMixin, UpdateView):
 
 class DeleteMailing(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Классовое представление принимающее GET и POST запросы,
-        и возвращающее страницу подтверждения об удалении 'Сообщения'."""
+    и возвращающее страницу подтверждения об удалении 'Сообщения'."""
 
     model = Mailing  # определяем модель
     template_name = "mailing/delete_mailing.html"  # определяем шаблон
@@ -280,6 +284,7 @@ class DeleteMailing(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 # MailingAttempts
 
+
 class SendingMessages(View):
     """Классовое представление выполняет проверку статуса рассылки,
     перед переходом на страницу ручного запуска рассылки."""
@@ -291,9 +296,12 @@ class SendingMessages(View):
             recipient = mailing.recipient
             number_mailings = recipient.count()
             list_recipients = recipient.all()
-            context = {"mailing": mailing,
-                       "error_message": "Отправка рассылки не разрешена из-за временных ограничений!",
-                       "number_mailings": number_mailings, "list_recipients": list_recipients}
+            context = {
+                "mailing": mailing,
+                "error_message": "Отправка рассылки не разрешена из-за временных ограничений!",
+                "number_mailings": number_mailings,
+                "list_recipients": list_recipients,
+            }
             return render(request, "mailing/detail_mailing.html", context)
         return redirect(reverse("mailing:create_sending_messages", kwargs={"pk": pk}))
 
@@ -323,16 +331,25 @@ class CreateSendingMessages(View):
                 send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
             except Exception as server_response:
                 # попытка рассылки и добавление её в БД
-                MailingAttempts.objects.create(status="Не успешно", server_response=f"Error: {server_response}",
-                                               mailing=mailing, owner=mailing.owner)
+                MailingAttempts.objects.create(
+                    status="Не успешно",
+                    server_response=f"Error: {server_response}",
+                    mailing=mailing,
+                    owner=mailing.owner,
+                )
             else:
-                MailingAttempts.objects.create(status="Успешно", server_response="Отправлено",
-                                               mailing=mailing, owner=mailing.owner)
+                MailingAttempts.objects.create(
+                    status="Успешно", server_response="Отправлено", mailing=mailing, owner=mailing.owner
+                )
         message = "Рассылка выполнена! С результатами рассылки можно ознакомится в разделе 'Статистика рассылок'."
         number_mailings = mailing.recipient.all().count()
         list_recipients = mailing.recipient.all()
-        context = {"mailing": mailing, "message": message,
-                   "number_mailings": number_mailings, "list_recipients": list_recipients}
+        context = {
+            "mailing": mailing,
+            "message": message,
+            "number_mailings": number_mailings,
+            "list_recipients": list_recipients,
+        }
         return render(request, "mailing/detail_mailing.html", context)
 
 
@@ -355,9 +372,11 @@ class MailingStatistics(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context["successful_mailing_lists"] = MailingService.get_list_mailing_attempts_user_status_successfully(
-            user).count()
+            user
+        ).count()
         context["unsuccessful_mailing_lists"] = MailingService.get_list_mailing_attempts_user_status_not_successfully(
-            user).count()
+            user
+        ).count()
         context["list_recipients"] = MailingService.get_list_recipients_user(user).count()
         context["list_messages"] = MailingService.get_list_messages_user(user).count()
         return context

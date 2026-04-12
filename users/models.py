@@ -6,6 +6,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class UserOfService(AbstractUser):
     """Класс определяющий модель пользователя"""
+
     username = None
 
     email = models.EmailField(unique=True, verbose_name="Адрес электронной почты")
@@ -18,6 +19,7 @@ class UserOfService(AbstractUser):
     REQUIRED_FIELDS = []
 
     def __str__(self):
+        """Метод определяет строковое представление объекта."""
         return f"{self.last_name} {self.first_name} email: {self.email}"
 
     class Meta:

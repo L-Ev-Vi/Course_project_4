@@ -3,22 +3,34 @@ import secrets
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView, \
-    PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordChangeView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetView,
+)
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView
-from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView, UpdateView
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic.edit import CreateView, UpdateView
 
-from users.forms import AuthenticationUserOfService, ChangeUserOfService, FormUserOfService, \
-    PasswordChangeUserOfServiceForms, ChangeUsersOfService, PasswordResetUserForm, PasswordResetConfirmForm
-from users.models import UserOfService
 from mailing.service import MailingService
+from users.forms import (
+    AuthenticationUserOfService,
+    ChangeUserOfService,
+    ChangeUsersOfService,
+    FormUserOfService,
+    PasswordChangeUserOfServiceForms,
+    PasswordResetConfirmForm,
+    PasswordResetUserForm,
+)
+from users.models import UserOfService
 
 
 class MyLogin(LoginView):
@@ -30,6 +42,7 @@ class MyLogin(LoginView):
 
 class MyLogout(LogoutView):
     """Классовое представление для выхода пользователей из системы."""
+
     pass
 
 
@@ -139,6 +152,7 @@ class PasswordResetUser(PasswordResetView):
     email_template_name = "users/password_reset_email.html"
     success_url = reverse_lazy("users:recovery")  # определяем URL-адрес для перехода
 
+
 @method_decorator(cache_page(60 * 60), name="dispatch")
 class Recovery(TemplateView):
     """Классовое представление принимающее GET запрос,
@@ -178,6 +192,7 @@ class DetailUser(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return self.request.user
 
+
 @method_decorator(cache_page(60 * 1), name="dispatch")
 class ListUsers(ListView):
     """Классовое представление принимающее GET запрос и возвращающее страницу с зарегистрированными пользователями."""
@@ -199,6 +214,7 @@ class ListUsers(ListView):
             return list_users
         else:
             return PermissionDenied
+
 
 @method_decorator(cache_page(60 * 5), name="dispatch")
 class DetailUserOfService(LoginRequiredMixin, DetailView):

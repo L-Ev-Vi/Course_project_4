@@ -12,8 +12,9 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         """Метод создания группы"""
 
-        Group.objects.all().delete()  # предварительное удаление данных из таблицы auth_group перед загрузкой новых
-        Permission.objects.all().delete()  # предварительное удаление данных из таблицы auth_permission перед загрузкой новых
+        # предварительное удаление данных, из таблиц auth_group и auth_permission, перед загрузкой новых
+        Group.objects.all().delete()
+        Permission.objects.all().delete()
 
         # сброс инкремента (счётчика 'id' до 1)
         with connection.cursor() as cur:

@@ -130,7 +130,9 @@ LOGOUT_REDIRECT_URL = "mailing:index"
 LOGIN_URL = "users:login"
 
 COUNTRIES_FIRST_AUTO_DETECT = True
-COUNTRIES_FIRST = ["RU", ]
+COUNTRIES_FIRST = [
+    "RU",
+]
 COUNTRIES_FIRST_SORT = True
 
 CACHE_ENABLED = True if os.getenv("CACHE_ENABLED") == "True" else False

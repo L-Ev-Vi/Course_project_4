@@ -1,6 +1,12 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm, UserCreationForm, \
-    PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UserChangeForm,
+    UserCreationForm,
+)
 
 from mailing.forms import MixinStyle
 from users.models import UserOfService
@@ -18,6 +24,7 @@ class FormUserOfService(MixinStyle, UserCreationForm):
 
 class AuthenticationUserOfService(MixinStyle, AuthenticationForm):
     """Класс представляющий форму для входа пользователя в систему."""
+
     pass
 
 
@@ -50,6 +57,7 @@ class ChangeUserOfService(UserChangeForm):
 
 class PasswordChangeUserOfServiceForms(MixinStyle, PasswordChangeForm):
     """Класс представляющий форму для смены пароля пользователя."""
+
     pass
 
 
@@ -58,7 +66,9 @@ class ChangeUsersOfService(UserChangeForm):
 
     class Meta(UserChangeForm.Meta):
         model = UserOfService
-        fields = ["is_active", ]
+        fields = [
+            "is_active",
+        ]
 
     def __init__(self, *args, **kwargs) -> None:
         """Метод стилизации полей формы."""
@@ -69,9 +79,11 @@ class ChangeUsersOfService(UserChangeForm):
 
 class PasswordResetUserForm(MixinStyle, PasswordResetForm):
     """Класс представляющий форму для ввода почты при восстановлении пароля пользователя."""
+
     pass
 
 
 class PasswordResetConfirmForm(MixinStyle, SetPasswordForm):
     """Класс представляющий форму для ввода нового пароля при восстановлении пароля пользователя."""
+
     pass

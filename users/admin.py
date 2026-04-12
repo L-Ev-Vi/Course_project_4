@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-
 from users.models import UserOfService
 
 
@@ -13,6 +12,4 @@ class UserOfServiceAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
     )
-    search_fields = (
-        "email",
-    )
+    search_fields = ("email",)

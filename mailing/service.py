@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
-from .models import Recipient, Message, Mailing, MailingAttempts
+from .models import Mailing, MailingAttempts, Message, Recipient
 
 
 class MailingService:
@@ -135,7 +135,9 @@ class MailingService:
             key = f"mailing_attempts_status_not_successfully_{user}"
             mailing_attempts_status_not_successfully = cache.get(key)
             if not mailing_attempts_status_not_successfully:
-                mailing_attempts_status_not_successfully = MailingAttempts.objects.filter(owner=user, status="Не успешно")
+                mailing_attempts_status_not_successfully = MailingAttempts.objects.filter(
+                    owner=user, status="Не успешно"
+                )
                 cache.set(key, mailing_attempts_status_not_successfully, 60 * 1)
             return mailing_attempts_status_not_successfully
         return MailingAttempts.objects.filter(owner=user, status="Не успешно")

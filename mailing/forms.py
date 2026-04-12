@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from formset.widgets import DateTimeInput
 
-from mailing.models import Recipient, Message, Mailing
+from mailing.models import Mailing, Message, Recipient
 
 
 class MixinStyle:
@@ -26,7 +26,13 @@ class FormRecipient(MixinStyle, forms.ModelForm):
         """Клас для добавления данных к форме."""
 
         model = Recipient  # определяем модель
-        fields = ["email", "first_name", "last_name", "patronymic", "comment", ]
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "patronymic",
+            "comment",
+        ]
 
 
 class FormMessage(MixinStyle, forms.ModelForm):
@@ -36,7 +42,10 @@ class FormMessage(MixinStyle, forms.ModelForm):
         """Клас для добавления данных к форме."""
 
         model = Message  # определяем модель
-        fields = ["subject_letter", "body_letter", ]
+        fields = [
+            "subject_letter",
+            "body_letter",
+        ]
 
 
 class FormMailing(MixinStyle, forms.ModelForm):
@@ -47,7 +56,10 @@ class FormMailing(MixinStyle, forms.ModelForm):
 
         model = Mailing  # определяем модель
         fields = ["message", "start_time", "end_time", "recipient"]
-        localized_fields = ('start_time', "end_time",)
+        localized_fields = (
+            "start_time",
+            "end_time",
+        )
 
         # recipients = forms.ModelMultipleChoiceField(queryset=Recipient.objects.all())
 
