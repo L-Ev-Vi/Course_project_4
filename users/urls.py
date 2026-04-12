@@ -3,7 +3,7 @@ from django.urls import path
 from users import views
 from users.apps import UsersConfig
 
-app_name = UsersConfig.name
+app_name = UsersConfig.name # Задает пространство имен для всех маршрутов в файле
 
 urlpatterns = [
     path("login/", views.MyLogin.as_view(), name="login"),

@@ -3,7 +3,7 @@ from django.urls import path
 from mailing import views
 from mailing.apps import MailingConfig
 
-app_name = MailingConfig.name
+app_name = MailingConfig.name # Задает пространство имен для всех маршрутов в файле
 
 urlpatterns = [
 
