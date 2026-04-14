@@ -16,7 +16,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'mailing:index' %}">Главная</a></li>
             {% if perms.users.can_inactive_users %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'users:list_users' %}">Список пользователей</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'users:list_users' %}">Пользователи</a></li>
             {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_recipients' %}">Получатели</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_messages' %}">Сообщения</a></li>
