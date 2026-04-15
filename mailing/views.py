@@ -215,6 +215,13 @@ class CreateMailing(LoginRequiredMixin, CreateView):
     template_name = "mailing/add_mailing.html"  # определяем шаблон
     success_url = reverse_lazy("mailing:index")  # определяем URL-адрес для перехода
 
+    def get_form(self, form_class=None):
+        """Получаем форму и настраиваем queryset полей на получение сообщений и клиентов пользователя."""
+        form = super().get_form(form_class)
+        form.fields["message"].queryset = Message.objects.filter(owner=self.request.user)
+        form.fields["recipient"].queryset = Recipient.objects.filter(owner=self.request.user)
+        return form
+
     def form_valid(self, form):
         """Метод определения автора 'Рассылки' после успешной валидации формы."""
         form.instance.owner = self.request.user
@@ -256,6 +263,15 @@ class UpdateMailing(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         """Метод перенаправления на страницу 'Рассылки' после его(ё) редактирования."""
         return reverse_lazy("mailing:detail_mailing", kwargs={"pk": self.object.pk})
+
+    def get_form(self, form_class=None):
+        """Получаем форму и настраиваем queryset полей на получение сообщений и клиентов пользователя."""
+        form = super().get_form(form_class)
+        user = self.request.user
+        if user == self.object.owner:
+            form.fields["message"].queryset = Message.objects.filter(owner=self.request.user)
+            form.fields["recipient"].queryset = Recipient.objects.filter(owner=self.request.user)
+        return form
 
     def get_form_class(self):
         """Метод выполняющий проверку прав доступа на редактирование 'Рассылки'."""
