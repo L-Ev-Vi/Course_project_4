@@ -1,0 +1,32 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Детали клиента{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="jumbotron">
+    <div class="container p-5">
+        <p>{{ recipient.first_name }}</p>
+        <p>{{ recipient.last_name }}</p>
+        {% if recipient.patronymic %}
+            <p>{{ recipient.patronymic }}</p>
+        {% endif %}
+        <p>Дата добавления: {{ recipient.created_at|date:"d F Y" }}</p>
+        <p>{{ recipient.comment }}</p>
+        <div class="row g-0">
+            <footer class="text-center pt-4 my-md-1 pt-md-2">
+                <a class="mx-auto btn-lg btn-block btn btn-outline-secondary" href="{% url 'mailing:list_recipients' %}">Вернуться к списку</a>
+            </footer>
+        {% if recipient.owner == user %}
+            <footer class="pt-2 my-md-1 pt-md-2">
+                <a class="btn btn-outline-secondary" href="{% url 'mailing:update_recipient' recipient.pk %}">Редактировать</a>
+            </footer>
+            <footer class="pt-2 my-md-1 pt-md-2">
+                <a class="btn btn-outline-danger" href="{% url 'mailing:delete_recipient' recipient.pk %}">Удалить</a>
+            </footer>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

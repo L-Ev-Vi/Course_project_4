@@ -1,0 +1,63 @@
+<header data-bs-theme="dark">
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'mailing:index' %}">Сервер</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarCollapse"
+        aria-controls="navbarCollapse"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'mailing:index' %}">Главная</a></li>
+            {% if perms.users.can_inactive_users %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'users:list_users' %}">Пользователи</a></li>
+            {% endif %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_recipients' %}">Получатели</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'mailing:list_messages' %}">Сообщения</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'mailing:mailing_statistics' %}">Статистика рассылок</a></li>
+            {% if transition %}
+                <form method="post" action="" class="form-floating" enctype="multipart/form-data">
+                    {% csrf_token %}
+                        <button type="submit" class="nav-item me-2 p-2 btn btn-outline-info">Выполнить рассылку</button>
+                </form>
+            {% elif mailing and not perms.mailing.can_unpublish_mailing %}
+                <li class="nav-item"><a class="me-2 p-2 btn btn-outline-info" href="{% url 'mailing:sending_messages' mailing.pk %}">Выполнить рассылку</a></li>
+            {% endif %}
+          {% if user.is_authenticated %}
+              <li class="nav-item"><a class="me-2 p-2 btn btn-outline-secondary" href="{% url 'users:detail_user' %}">Профиль</a></li>
+              <li class="nav-item">
+                  <form method="post" action="{% url 'users:logout' %}" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="me-2 p-2 btn btn-outline-danger">Выйти</button>
+                  </form>
+              </li>
+          {% else %}
+              <li class="nav-item">
+                  <a class="me-2 p-2 btn btn-outline-secondary" href="{% url 'users:login' %}">Войти</a>
+              </li>
+              <li class="nav-item">
+                  <a class="me-2 p-2 btn btn-outline-secondary" href="{% url 'users:register' %}">Зарегистрироваться</a>
+              </li>
+          {% endif %}
+<!--          <li class="nav-item"><a class="nav-link disabled" aria-disabled="true">Disabled</a></li>-->
+        </ul>
+        <form class="d-flex" role="search">
+          <input
+            class="form-control me-2"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"/>
+          <button class="btn btn-outline-success" type="submit">
+            Search
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+</header>

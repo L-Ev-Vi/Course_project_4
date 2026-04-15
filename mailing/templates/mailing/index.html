@@ -1,0 +1,206 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div id="myCarousel" class="carousel slide mb-4 custom-carousel" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+      <button
+        type="button"
+        data-bs-target="#myCarousel"
+        data-bs-slide-to="0"
+        class="active"
+        aria-current="true"
+        aria-label="Slide 1"
+      ></button>
+      <button
+        type="button"
+        data-bs-target="#myCarousel"
+        data-bs-slide-to="1"
+        aria-label="Slide 2"
+      ></button>
+      <button
+        type="button"
+        data-bs-target="#myCarousel"
+        data-bs-slide-to="2"
+        aria-label="Slide 3"
+      ></button>
+    </div>
+    <div class="carousel-inner custom-carousel">
+      <div class="carousel-item active">
+        <svg
+          aria-hidden="true"
+          class="bd-placeholder-img"
+          height="100%"
+          preserveAspectRatio="xMidYMid slice"
+          width="100%"
+          xmlns="http://www.w3.org/2000/svg">
+          <rect width="100%" height="100%" fill="var(--bs-secondary-color)"></rect>
+        </svg>
+        <div class="container">
+          <div class="carousel-caption" style="height: 450px;">
+            <h1>Общее количество рассылок.</h1>
+            <h2>{{ number_mailings }}</h2>
+            <p><a class="btn btn-lg btn-primary" href="{% url 'mailing:index' %}">Список рассылок</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item custom-carousel">
+        <svg
+          aria-hidden="true"
+          class="bd-placeholder-img"
+          height="100%"
+          preserveAspectRatio="xMidYMid slice"
+          width="100%"
+          xmlns="http://www.w3.org/2000/svg">
+          <rect width="100%" height="100%" fill="var(--bs-secondary-color)"></rect>
+        </svg>
+        <div class="container">
+          <div class="carousel-caption" style="height: 190px;">
+            <h1>Общее количество активных рассылок.</h1>
+            <h2>{{ number_mailings_active }}</h2>
+            <p><a class="btn btn-lg btn-primary" href="{% url 'mailing:index' %}">Список рассылок</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item custom-carousel">
+        <svg
+          aria-hidden="true"
+          class="bd-placeholder-img"
+          height="100%"
+          preserveAspectRatio="xMidYMid slice"
+          width="100%"
+          xmlns="http://www.w3.org/2000/svg">
+          <rect width="100%" height="100%" fill="var(--bs-secondary-color)"></rect>
+        </svg>
+        <div class="container">
+          <div class="carousel-caption" style="height: 190px;">
+            <h1>Общее число клиентов в системе.</h1>
+            <h2>{{ number_recipientes }}</h2>
+            <p><a class="btn btn-lg btn-primary" href="{% url 'mailing:list_messages' %}">Список клиентов</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#myCarousel"
+      data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#myCarousel"
+      data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+</div>
+{% if user.is_authenticated %}
+<div class="text-center p-3">
+    <a class="btn btn-outline-secondary" href="{% url 'mailing:add_mailing' %}">Создать рассылку</a>
+</div>
+{% endif %}
+<div class="container marketing">
+    <div class="row">
+      {% for mailing in mailings %}
+          <div class="col-md-4">
+              <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                  <div class="col p-4 d-flex flex-column position-static">
+                      <h4 class="my-0 font-weight-normal">{{ mailing }}</h4>
+                      <div class="mb-1 text-body-secondary">Количество получателей: {{ mailing.recipient.all|length }}</div>
+                      <p class="card-text mb-auto">
+                          {{ mailing.message.body_letter|truncatechars:30 }}
+                      </p>
+                      <a href="{% url 'mailing:detail_mailing' mailing.pk %}" class="icon-link gap-1 icon-link-hover stretched-link">Перейти к рассылки
+                          <svg class="bi" aria-hidden="true"><use xlink:href="#chevron-right"></use></svg></a>
+                  </div>
+                  <div class="col-auto d-none d-lg-block">
+                      <svg
+                          aria-label="Placeholder"
+                          class="bd-placeholder-img rounded-circle"
+                          height="100"
+                          preserveAspectRatio="xMidYMid slice"
+                          role="img"
+                          width="100"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <title>Placeholder</title>
+                          {% if mailing.status == "Запущена" %}
+                              <rect width="100%" height="100%" fill="#008000"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Запущена</text>
+                          {% elif mailing.status == "Завершена" %}
+                              <rect width="100%" height="100%" fill="#990000"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Завершена</text>
+                          {% else %}
+                              <rect width="100%" height="100%" fill="#044857"></rect>
+                              <text x="50%" y="50%" fill="#eceeef" dy=".3em">Создана</text>
+                          {% endif %}
+                      </svg>
+                  </div>
+                  {% if perms.mailing.can_unpublish_mailing %}
+                  <div class="row">
+                      <div class="col-auto d-none d-lg-block">
+                          <svg
+                              aria-label="Placeholder"
+                              class="bd-placeholder-img rounded-circle"
+                              height="45"
+                              preserveAspectRatio="xMidYMid slice"
+                              role="img"
+                              width="45"
+                              xmlns="http://www.w3.org/2000/svg">
+                              <title>Placeholder</title>
+                              {% if mailing.publication == False %}
+                                  <rect width="100%" height="100%" fill="#990000"></rect>
+                                  <text x="50%" y="50%" fill="#eceeef" dy=".3em">block</text>
+                              {% endif %}
+                          </svg>
+                      </div>
+                  </div>
+                  {% endif %}
+              </div>
+          </div>
+      {% endfor %}
+    </div>
+
+
+<ul class="pagination justify-content-center">
+    {%if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}"><-Предыдущая</a></li>
+    {% endif %}
+        <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+    {%if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">Следующая-></a></li>
+    {% endif %}
+</ul>
+
+    <hr class="featurette-divider"/>
+    <div class="row featurette">
+      <div class="col order-md-2 text-center">
+        <h2 class="featurette-heading fw-normal lh-1">
+          <span class="text-body-secondary">Python 3.13.5</span>
+        </h2>
+        <p class="lead"></p>
+      </div>
+      <div class="col order-md-1">
+        <img src="https://avatars.mds.yandex.net/i?id=9156cfb709e690257f43d0d8f952fe1d_l-12475310-images-thumbs&n=13" height="500" width="500">
+      </div>
+    </div>
+    <hr class="featurette-divider"/>
+    <div class="row featurette">
+      <div class="col-md-7 text-center">
+        <h2 class="featurette-heading fw-normal lh-1">
+          <span class="text-body-secondary">Django 6.0.3</span>
+        </h2>
+        <p class="lead"></p>
+      </div>
+      <div class="col-md-5">
+        <img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/8a736595846685.5ea0c79f51dd5.jpg" height="500" width="500">
+      </div>
+    </div>
+</div>
+{% endblock %}

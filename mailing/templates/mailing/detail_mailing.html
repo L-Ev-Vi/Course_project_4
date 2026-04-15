@@ -1,0 +1,68 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}{{ mailing }}{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="container marketing">
+    <div class="jumbotron">
+        <div class="row container p-5">
+            <div class="col-6">
+                <h2>{{ mailing }}</h2>
+                <p>Дата начала рассылки: {{ mailing.start_time }}</p>
+                <p>Статус: {{ mailing.status }}</p>
+                <p>Дата окончания рассылки: {{ mailing.end_time }}</p>
+                {% if perms.users.can_inactive_users %}
+                    <p>Автор: <a href="{% url 'users:user_information' mailing.owner.pk %}">{{ mailing.owner }}</a></p>
+                {% else %}
+                    <p>Автор: {{ mailing.owner }}</p>
+                {% endif %}
+                <p>Количество получателей: {{ number_mailings }}</p>
+                {% if perms.mailing.can_unpublish_mailing or mailing.owner == user %}
+                    <footer class="pt-2 my-md-1 pt-md-2">
+                        <a class="btn btn-outline-secondary" href="{% url 'mailing:update_mailing' mailing.pk %}">Редактировать</a>
+                    </footer>
+                {% endif %}
+                {% if mailing.owner == user %}
+                    <footer class="pt-2 my-md-1 pt-md-2">
+                        <a class="btn btn-outline-danger" href="{% url 'mailing:delete_mailing' mailing.pk %}">Удалить</a>
+                    </footer>
+                {% endif %}
+            </div>
+            <div class="col-6">
+                {% if mailing.owner == user %}
+                    <div class="text-center row g-0">
+                        {% if error_message %}
+                            <p class="fs-5" style="color: red;">{{ error_message }}</p>
+                        {% elif message %}
+                            <p class="fs-5" style="color: #008000;">{{ message }}</p>
+                        <footer class="text-center pt-4 my-md-1 pt-md-2">
+                            <a class="mx-auto btn-lg btn-block btn btn-outline-info" href="{% url 'mailing:mailing_statistics' %}">Статистика рассылок</a>
+                        </footer>
+                        {% endif %}
+                        <footer class="text-center pt-4 my-md-1 pt-md-2">
+                            <a class="mx-auto btn-lg btn-block btn btn-outline-info" href="{% url 'mailing:sending_messages' mailing.pk %}">Выполнить рассылку</a>
+                        </footer>
+                    </div>
+                {% endif %}
+                <div class="row g-0">
+                    <footer class="text-center pt-4 my-md-1 pt-md-2">
+                        <a class="col-7 mx-auto btn-lg btn-block btn btn-outline-secondary" href="{% url 'mailing:index' %}">Вернуться к рассылкам</a>
+                    </footer>
+                </div>
+                <hr class="featurette"/>
+                <h2 class="text-center">Список получателей:</h2>
+                <ul class="list-group">
+                    {% for recipient in list_recipients %}
+                        <li class="list-group-item">
+                            <a href="{% url 'mailing:detail_recipient' recipient.pk %}">{{ recipient }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

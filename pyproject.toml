@@ -3,7 +3,7 @@ name = "course-project-4"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Evgenii_Lobachev",email = "lobachev9614@gmail.com"}
+    { name = "Evgenii_Lobachev", email = "lobachev9614@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -16,10 +16,10 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.lint.dependencies]
-black = "^26.3.1"
 flake8 = "^7.3.0"
 isort = "^8.0.1"
 mypy = "^1.19.1"
+black = "^26.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -27,11 +27,20 @@ django = "^6.0.3"
 django-stubs = "^6.0.1"
 python-dotenv = "^1.2.2"
 psycopg2 = "^2.9.11"
+pillow = "^12.1.1"
+django-cleanup = "^9.0.0"
+django-countries = "^8.2.0"
+django-phonenumber-field = "^8.4.0"
+phonenumbers = "^9.0.26"
+crispy-bootstrap5 = "^2026.3"
+django-formset = "^2.2.3"
+ipython = "^9.12.0"
+redis = "^7.4.0"
 
 [tool.mypy]
 disallow_untyped_defs = true
 warn_return_any = true
-exclude = ['.venv','tests', 'idea', 'git', '.coverage', 'logs', 'static']
+exclude = ['.venv', 'tests', 'idea', 'git', '.coverage', 'logs', 'static', 'media']
 
 [tool.isort]
 profile = "black"

@@ -1,0 +1,20 @@
+{% extends 'mailing/includes/basic_template.html' %}
+{% load my_tags %}
+
+{% block title %}Удаление сообщения{% endblock %}
+
+{% block content %}
+{% include 'mailing/includes/header_menu.html' %}
+<div class="jumbotron">
+    <div class="text-center container p-5">
+        <h2>Удаление сообщения</h2>
+        <p>Вы уверены, что хотите удалить сообщение?</p>
+        <p>"{{ message }}"</p>
+        <form method="post" class="pt-2 my-md-1 pt-md-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'mailing:detail_message' message.pk %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
